@@ -40,14 +40,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
    protected void onCreate(Bundle savedInstanceState) {
        super.onCreate(savedInstanceState);
        setContentView(R.layout.activity_main);
-//Assigns variables to text and video player elements on user interface
+        //Assigns variables to text and video player elements on user interface
        textView = (TextView)findViewById(R.id.text);
        tv = (TextureView) findViewById(R.id.vid);
        tv.setSurfaceTextureListener(this);
        mp = new MediaPlayer();
 
        try {
-//Assigns video file to media player
+            //Assigns video file to media player
            fd = getAssets().openFd("video_file1.3gp");
        } catch (IOException e) {
            e.printStackTrace();
@@ -55,51 +55,51 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
    }
 
-
-//Settings for face detector (FAST over ACCURATE, ALL_LANDMARKS allows the detection of the eyes, ALL_CLASSIFICATIONS allows the classification of images into eyes open and eyes closed)
+   //Settings for face detector (FAST over ACCURATE, ALL_LANDMARKS allows the detection of the eyes,
+   //ALL_CLASSIFICATIONS allows the classification of images into eyes open and eyes closed)
    FirebaseVisionFaceDetectorOptions options =
            new FirebaseVisionFaceDetectorOptions.Builder()
                    .setPerformanceMode(FirebaseVisionFaceDetectorOptions.FAST) 
                    .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
-         .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
+                   .setClassificationMode(FirebaseVisionFaceDetectorOptions.ALL_CLASSIFICATIONS)
                    .build();
 
-//Initialization of face detector method   
-private void detectFaces (Bitmap bitmap) {
-       FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
+   //Initialization of face detector method   
+   private void detectFaces (Bitmap bitmap) {
+          FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
 
-       FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
-               .getVisionFaceDetector(options);
+          FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
+                  .getVisionFaceDetector(options);
 
-       detector.detectInImage(image)
-               .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionFace>>() {
-                   @Override
-                   public void onSuccess(List<FirebaseVisionFace> firebaseVisionFaces) {
-                       for (FirebaseVisionFace face : firebaseVisionFaces) {
+          detector.detectInImage(image)
+                  .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionFace>>() {
+                      @Override
+                      public void onSuccess(List<FirebaseVisionFace> firebaseVisionFaces) {
+                          for (FirebaseVisionFace face : firebaseVisionFaces) {
 
-                           if (face.getLeftEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
-                               leftprob = face.getLeftEyeOpenProbability();
-                           }
-                           if (face.getRightEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
-                               rightprob = face.getRightEyeOpenProbability();
-                           }
-                           if (leftprob < 0.5 && rightprob < 0.5) {
-                               textView.setText("Closed"); //If the calculated probability value for both eyes is less than 0.5, the application will say that the driver’s eyes were closed
+                              if (face.getLeftEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
+                                  leftprob = face.getLeftEyeOpenProbability();
+                              }
+                              if (face.getRightEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
+                                  rightprob = face.getRightEyeOpenProbability();
+                              }
+                              if (leftprob < 0.5 && rightprob < 0.5) {
+                                  textView.setText("Closed"); //If the calculated probability value for both eyes is less than 0.5, the application will say that the driver’s eyes were closed
 
-                           }
-                           if (leftprob >= 0.5 && rightprob >= 0.5) {
-                               textView.setText("Open");
-                           }
-                       }
-                   }
-               })
-               .addOnFailureListener(new OnFailureListener() {
-                   @Override
-                   public void onFailure(@NonNull Exception e) {
+                              }
+                              if (leftprob >= 0.5 && rightprob >= 0.5) {
+                                  textView.setText("Open");
+                              }
+                          }
+                      }
+                  })
+                  .addOnFailureListener(new OnFailureListener() {
+                      @Override
+                      public void onFailure(@NonNull Exception e) {
 
-                   }
-               });
-   }
+                      }
+                  });
+      }
 
    @RequiresApi(api = Build.VERSION_CODES.N)
    @Override
