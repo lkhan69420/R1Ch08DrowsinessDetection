@@ -1,4 +1,5 @@
 package com.example.drowsinessdetection;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
@@ -42,12 +43,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
        setContentView(R.layout.activity_main);
         //Assigns variables to text and video player elements on user interface
        textView = (TextView)findViewById(R.id.text);
-       tv = (TextureView) findViewById(R.id.vid);
+       tv = (TextureView) findViewById(R.id.vid); /*It is impossible to take a screenshot of the video if the video plays
+       on a normal video player (VideoView) element; thus, a TextureView element is used to play the video instead */
        tv.setSurfaceTextureListener(this);
        mp = new MediaPlayer();
 
        try {
-            //Assigns video file to media player
+            //Assigns video file to file descriptor
            fd = getAssets().openFd("video_file1.3gp");
        } catch (IOException e) {
            e.printStackTrace();
@@ -55,8 +57,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
    }
 
-   //Settings for face detector (FAST over ACCURATE, ALL_LANDMARKS allows the detection of the eyes,
-   //ALL_CLASSIFICATIONS allows the classification of images into eyes open and eyes closed)
+   /*Settings for face detector (FAST over ACCURATE, ALL_LANDMARKS allows the detection of the eyes,
+   ALL_CLASSIFICATIONS allows the classification of images into eyes open and eyes closed)*/
    FirebaseVisionFaceDetectorOptions options =
            new FirebaseVisionFaceDetectorOptions.Builder()
                    .setPerformanceMode(FirebaseVisionFaceDetectorOptions.FAST) 
@@ -84,7 +86,8 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                                   rightprob = face.getRightEyeOpenProbability();
                               }
                               if (leftprob < 0.5 && rightprob < 0.5) {
-                                  textView.setText("Closed"); //If the calculated probability value for both eyes is less than 0.5, the application will say that the driver’s eyes were closed
+                                  textView.setText("Closed"); /*If the calculated probability value for both eyes is
+                                  less than 0.5, the application will say that the driver’s eyes were closed*/
 
                               }
                               if (leftprob >= 0.5 && rightprob >= 0.5) {
@@ -106,23 +109,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
         Surface surface = new Surface(surfaceTexture);
         try {
-            mp.setDataSource(fd);
-            mp.setSurface(surface);
+            mp.setDataSource(fd); //Assigns file descriptor (mentioned earlier) to media player
+            mp.setSurface(surface); /*Assigns media player to TextureView element which the video plays on
+            (the media player merely allows the video to play and is not an actual element that shows up on the UI) */
             mp.prepareAsync();
             mp.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mp) {
-                    new CountDownTimer(mp.getDuration(), 400) {
-                        public void onTick(long millisUntilFinished) {
-                            System.out.println("seconds remaining: " + millisUntilFinished / 500);
-                            detectFaces(b);
-                        }
-                        public void onFinish() {
-                            textView.setText("done!");
-                        }
-
-                    }.start();
-                    mp.start();
+                    mp.start(); //Starts playing the video
                 }
             });
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -136,6 +130,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             e.printStackTrace();
         }
     }
+   
+   /*The following 3 methods are abstract methods, which means that they are required to be put into the program
+   otherwise it will return an error and the program will not run. They are left empty because they will not be used.*/
 
    @Override
    public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
