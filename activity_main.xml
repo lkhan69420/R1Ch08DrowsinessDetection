@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    tools:context=".MainActivity">
+
+    <TextureView
+        android:id="@+id/vid"
+        android:layout_width="133.3333333px"
+        android:layout_height="100px"
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="180dp"/>
+
+    <!--    Image must be AT LEAST 100x100px-->
+
+    <TextView
+        android:id="@+id/text"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="300dp"
+        android:text="Open/Closed"
+        android:textSize="20sp" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="268dp"
+        android:layout_height="201dp"
+        android:layout_marginLeft="280dp"
+        android:layout_centerVertical="true"
+        android:textAlignment="center"
+        android:src="@drawable/highground" />
+
+</RelativeLayout>
