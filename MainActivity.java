@@ -27,6 +27,7 @@ import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetector;
 
 public class MainActivity extends AppCompatActivity implements TextureView.SurfaceTextureListener {
 
+   private View main;
    private TextView textView;
    private MediaPlayer mp;
    private SurfaceHolder sh;
@@ -36,12 +37,16 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
    private int closedDuration = 0;
    float leftprob;
    float rightprob;
+   private ImageView imageView;
+   private Bitmap b;
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
        super.onCreate(savedInstanceState);
        setContentView(R.layout.activity_main);
-        //Assigns variables to text and video player elements on user interface
+       main = findViewById(R.id.main);
+        //Assigns variables to text and video player, and ImageView (displays images) elements on user interface
+       imageView = (ImageView)findViewById(R.id.imageView);
        textView = (TextView)findViewById(R.id.text);
        tv = (TextureView) findViewById(R.id.vid); /*It is impossible to take a screenshot of the video if the video plays
        on a normal video player (VideoView) element; thus, a TextureView element is used to play the video instead */
@@ -50,7 +55,7 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
        try {
             //Assigns video file to file descriptor
-           fd = getAssets().openFd("video_file1.3gp");
+           fd = getAssets().openFd("video_file1.3gp"); //Video file must be in either .3gp or .mp4 format for it to play
        } catch (IOException e) {
            e.printStackTrace();
        }
@@ -68,29 +73,28 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
    //Initialization of face detector method   
    private void detectFaces (Bitmap bitmap) {
-          FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap);
+          FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(bitmap); /*Method takes in images in
+      bitmap form as input*/
 
           FirebaseVisionFaceDetector detector = FirebaseVision.getInstance()
-                  .getVisionFaceDetector(options);
+                  .getVisionFaceDetector(options); //Applies the settings to the face detector
 
           detector.detectInImage(image)
                   .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionFace>>() {
                       @Override
                       public void onSuccess(List<FirebaseVisionFace> firebaseVisionFaces) {
                           for (FirebaseVisionFace face : firebaseVisionFaces) {
-
                               if (face.getLeftEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
                                   leftprob = face.getLeftEyeOpenProbability();
                               }
                               if (face.getRightEyeOpenProbability() != FirebaseVisionFace.UNCOMPUTED_PROBABILITY) {
                                   rightprob = face.getRightEyeOpenProbability();
                               }
-                              if (leftprob < 0.5 && rightprob < 0.5) {
+                              if (leftprob < 0.7 && rightprob < 0.7) {
                                   textView.setText("Closed"); /*If the calculated probability value for both eyes is
-                                  less than 0.5, the application will say that the driver’s eyes were closed*/
-
+                                  less than 0.7, the application will say that the driver’s eyes were closed*/
                               }
-                              if (leftprob >= 0.5 && rightprob >= 0.5) {
+                              if (leftprob >= 0.7 && rightprob >= 0.7) {
                                   textView.setText("Open");
                               }
                           }
@@ -117,6 +121,17 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                 @Override
                 public void onPrepared(MediaPlayer mp) {
                     mp.start(); //Starts playing the video
+                    new CountDownTimer(mp.getDuration(), 250) { /*Sets a timer with intervals every 250 milliseconds
+                    until the end of the video*/
+                        public void onTick(long millisUntilFinished) {
+                            b = tv.getBitmap(); //Gets a screenshot of the video in bitmap form
+                            imageView.setImageBitmap(b); //Puts every screenshot taken on the ImageView display
+                            detectFaces(b); //Passes each screenshot to the face detector
+                        }
+                        public void onFinish() {
+                           
+                        }
+                    }.start(); //Starts timer
                 }
             });
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
