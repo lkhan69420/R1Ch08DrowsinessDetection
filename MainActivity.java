@@ -39,6 +39,9 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
    float rightprob;
    private ImageView imageView;
    private Bitmap b;
+   private int numConsecutiveInstances = 0;
+   private int instancesClosed = 0;
+   private boolean lastInstance = false;
 
    @Override
    protected void onCreate(Bundle savedInstanceState) {
@@ -93,9 +96,23 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                               if (leftprob < 0.7 && rightprob < 0.7) {
                                   textView.setText("Closed"); /*If the calculated probability value for both eyes is
                                   less than 0.7, the application will say that the driver’s eyes were closed*/
+                                  numConsecutiveInstances++;
+                                  if (numConsecutiveInstances >= 3) {
+                                    lastInstance = true; //If more than 3 consecutive frames feature closed eyes,
+                                     //the instance will be recorded as an instance of drowsiness
+                                  }
                               }
                               if (leftprob >= 0.7 && rightprob >= 0.7) {
                                   textView.setText("Open");
+                                 numConsecutiveInstances = 0; /*The number of consecutive frames featuring closed eyes 
+                                 resets to 0 when open eyes are detected*/
+                                 if (lastInstance == true) {
+                                    instancesClosed++; //The number/count of instances of drowsiness is increased by 1
+                                    //after those frames have been recorded
+                                    lastInstance = false;
+                                 } else {
+                                    lastInstance = false;
+                                 }
                               }
                           }
                       }
