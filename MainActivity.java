@@ -29,11 +29,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
 
    private View main;
    private TextView textView;
+   private TextView textview;
    private MediaPlayer mp;
    private SurfaceHolder sh;
    private TextureView tv;
    private String p;
    private AssetFileDescriptor fd;
+   public ArrayList<Integer> list = new ArrayList<Integer>();
    private int closedDuration = 0;
    float leftprob;
    float rightprob;
@@ -47,14 +49,18 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
    protected void onCreate(Bundle savedInstanceState) {
        super.onCreate(savedInstanceState);
        setContentView(R.layout.activity_main);
+       getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON); //Keeps screen on indefinitely
        main = findViewById(R.id.main);
         //Assigns variables to text and video player, and ImageView (displays images) elements on user interface
        imageView = (ImageView)findViewById(R.id.imageView);
        textView = (TextView)findViewById(R.id.text);
+       textview = (TextView)findViewById(R.id.textview);
        tv = (TextureView) findViewById(R.id.vid); /*It is impossible to take a screenshot of the video if the video plays
        on a normal video player (VideoView) element; thus, a TextureView element is used to play the video instead */
        tv.setSurfaceTextureListener(this);
        mp = new MediaPlayer();
+       ap = new MediaPlayer(); //Media player for playing the alarm
+       ap = MediaPlayer.create(this, R.raw.ringtone); //Setting the source (file to be played) for the alarm
 
        try {
             //Assigns video file to file descriptor
@@ -101,9 +107,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                                     lastInstance = true; //If more than 3 consecutive frames feature closed eyes,
                                      //the instance will be recorded as an instance of drowsiness
                                   }
+                                  if (numConsecutiveInstances == 3) {
+                                    ap.start(); //Starts the alarm
+                                    list.add(frame - 500); //Adds timestamp of drowsiness instance to array
+                                 }
                               }
                               if (leftprob >= 0.7 && rightprob >= 0.7) {
-                                  textView.setText("Open");
+                                 textView.setText("Open");
                                  numConsecutiveInstances = 0; /*The number of consecutive frames featuring closed eyes 
                                  resets to 0 when open eyes are detected*/
                                  if (lastInstance == true) {
@@ -113,7 +123,13 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                                  } else {
                                     lastInstance = false;
                                  }
+                                 if (ap.isPlaying() == true) {
+                                    ap.seekTo(0);
+                                    ap.pause(); //If the subject's eyes open, the alarm stops
+                                 }
                               }
+                              System.out.println(leftprob + ", " + rightprob);
+                              frame += 250;
                           }
                       }
                   })
@@ -154,7 +170,11 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
-                    mp.reset();
+                    mp.stop();
+                    textview.setText(instancesClosed + " instances of drowsiness");
+                    for (int i = 0; i <= list.size() - 1; i++) {
+                        System.out.println(list.get(i) + ", ");
+                    }
                 }
             });
 
