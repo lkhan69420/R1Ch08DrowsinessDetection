@@ -165,6 +165,14 @@ public class MainActivity extends AppCompatActivity implements TextureView.Surfa
                            
                         }
                     }.start(); //Starts timer
+                   handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            mp.start();
+                            timerStarted = true;
+                        }
+                    }, 7000); //Video starts playing 7 seconds after application opens
+                    System.out.println("START");
                 }
             });
             mp.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
